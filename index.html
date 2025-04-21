@@ -19,8 +19,18 @@
           <div class="progress-bar" id="progress-bar"></div>
         </div>
         <p id="progress-text">0 de 0 tarefas concluídas</p>
-        <h2>Produtividade da Semana</h2>
-        <canvas id="productivity-chart" width="400" height="200"></canvas>
+        <div class="chart-container">
+          <h2>Produtividade da Semana</h2>
+          <canvas id="productivity-chart" width="400" height="200"></canvas>
+        </div>
+        <div class="category-filters-container">
+          <h3>Filtrar por Categoria</h3>
+          <div id="category-filters">
+            <select id="category-select" class="category-select">
+              <option value="all">Todas as categorias</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 

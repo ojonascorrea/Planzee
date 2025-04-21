@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fillDateTimeInputs(); // 🆕 Chama para preencher a data/hora automaticamente
     updateProgress();
     createChart(generateProductivityData());
+    updateCategorySelect();
 });
 
 setInterval(checkTasksForNotifications, 60000); // Checa a cada 1 minuto
@@ -46,6 +47,7 @@ taskForm.addEventListener('submit', function(e) {
 
     addTask(title, date, time, false, priority, category);
     updateProgress();
+    updateCategorySelect();
 
     taskForm.reset();
     fillDateTimeInputs();
@@ -56,6 +58,7 @@ taskForm.addEventListener('submit', function(e) {
 function addTask(title, date, time, completed, priority, category = '') {
     const li = document.createElement('li');
     li.setAttribute('draggable', true);
+    li.setAttribute('data-category', category || 'outros');
     li.addEventListener('dragstart', function (e) {
         li.classList.add('dragging');
     });
@@ -403,3 +406,70 @@ function checkTasksForNotifications() {
         }
     });
 }
+
+function generateCategoryFilters() {
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const categories = new Set(tasks.map(task => task.category));
+
+    const filterContainer = document.getElementById('category-filters');
+    filterContainer.innerHTML = '<button class="filter-btn active" data-category="all">Todas</button>';
+
+    categories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.dataset.category = category;
+        btn.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        filterContainer.appendChild(btn);
+    });
+
+    setupFilterEvents();
+}
+
+// Função para atualizar o select de categorias
+function updateCategorySelect() {
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const categorySelect = document.getElementById('category-select');
+    
+    // Mantém apenas a opção "Todas as categorias"
+    categorySelect.innerHTML = '<option value="all">Todas as categorias</option>';
+    
+    // Obtém todas as categorias únicas
+    const categories = new Set(tasks.map(task => task.category).filter(Boolean));
+    
+    // Adiciona cada categoria como uma opção
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        categorySelect.appendChild(option);
+    });
+}
+
+// Função para filtrar tarefas por categoria
+function filterTasksByCategory(category) {
+    const tasks = document.querySelectorAll('li');
+    tasks.forEach(task => {
+        const taskCategory = task.getAttribute('data-category');
+        if (category === 'all' || taskCategory === category) {
+            task.style.display = 'flex';
+        } else {
+            task.style.display = 'none';
+        }
+    });
+}
+
+// Adicionar event listener para o select de categorias
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category-select');
+    
+    // Atualiza o select quando a página carrega
+    updateCategorySelect();
+    
+    // Adiciona o event listener para o select
+    categorySelect.addEventListener('change', function() {
+        filterTasksByCategory(this.value);
+    });
+});
+
+// Inicializar com o filtro "Todas" ativo
+document.querySelector('.filter-btn[data-category="all"]').classList.add('active');
