@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgress();
     createChart(generateProductivityData());
     updateCategorySelect();
+    
+    const sortByDateBtn = document.getElementById('sort-by-date-btn');
+    sortByDateBtn.addEventListener('click', sortByDate);
+
 });
 
 setInterval(checkTasksForNotifications, 60000); // Checa a cada 1 minuto
@@ -473,3 +477,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Inicializar com o filtro "Todas" ativo
 document.querySelector('.filter-btn[data-category="all"]').classList.add('active');
+
+
+// Função para ordenar as tarefas por data
+function sortByDate() {
+    const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    storedTasks.sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time}`);
+        const dateB = new Date(`${b.date}T${b.time}`);
+        return dateA - dateB;
+    });
+
+    localStorage.setItem('tasks', JSON.stringify(storedTasks));
+
+    location.reload(); // Recarrega a página para reordenar visualmente
+}
+

@@ -3,6 +3,12 @@
     --container-bg: white;
     --text-color: black;
     --task-bg: #e2e8f0;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --accent-color: #3498db;
+    --border-color: #e0e0e0;
 }
 
 body.dark {
@@ -10,6 +16,12 @@ body.dark {
     --container-bg: #1e1e1e;
     --text-color: #f0f0f0;
     --task-bg: #2c2c2c;
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --accent-color: #2980b9;
+    --border-color: #404040;
 }
 
 body {
@@ -295,33 +307,34 @@ li {
 }
 
 .search-container {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.02);
-    padding: 0px 20px 0px 20px;
-    border-radius: 12px;
-    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 #search-input {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #4CAF50;
-    border-radius: 8px;
-    font-size: 14px;
-    background: #ffffff;
-    color: #000000;
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: none;
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
     transition: all 0.3s ease;
-    box-sizing: border-box;
 }
 
 #search-input::placeholder {
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--text-secondary);
 }
 
 #search-input:focus {
-    outline: none;
-    border-color: #45a049;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    background-color: var(--bg-primary);
+    border-radius: 4px;
 }
 
 body.dark #search-input {
@@ -570,4 +583,30 @@ body.dark .category-select {
     padding: 10px;
     width: 100% !important;
     height: 200px !important;
+}
+
+/* Botão de organização por data */
+#sort-by-date-btn {
+    padding: 0.8rem 1.2rem;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 20px;
+}
+
+#sort-by-date-btn:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+#sort-by-date-btn:active {
+    transform: translateY(0);
 }
