@@ -8,6 +8,8 @@
     --success-color: #4caf50;
     --danger-color: #f44336;
     --warning-color: #ff9800;
+    --tag-color: #ff9800;
+    --tag-hover-color: #e67e22;
 }
 
 /* Tema escuro */
@@ -17,6 +19,8 @@
     --text-color: #f5f5f5;
     --border-color: #444;
     --shadow-color: rgba(0, 0, 0, 0.3);
+    --tag-color: #ff9800;
+    --tag-hover-color: #e67e22;
 }
 
 * {
@@ -207,6 +211,27 @@ header h1 {
     font-size: 0.9rem;
 }
 
+/* Estilos para etiquetas */
+.tag-badge {
+    background-color: var(--tag-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 5px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tag-badge:hover {
+    background-color: var(--tag-hover-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
     .container {
@@ -220,4 +245,34 @@ header h1 {
     .tags-list {
         grid-template-columns: 1fr;
     }
+}
+
+/* Botão de voltar */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: var(--tag-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.back-button:active {
+    transform: translateY(0);
 } 

@@ -1,9 +1,48 @@
 // Elementos do DOM
-const tagsContainer = document.getElementById('tagsContainer');
-const statsContainer = document.querySelector('.stats-container');
-const filteredTasksList = document.getElementById('filteredTasksList');
+const tagsContainer = document.getElementById('tagsList');
+const statsContainer = document.querySelector('.tags-stats');
+const filteredTasksList = document.getElementById('tag-tasks');
 const tagSearch = document.getElementById('tagSearch');
 const themeToggle = document.getElementById('themeToggle');
+
+// Pega o parâmetro da URL
+const urlParams = new URLSearchParams(window.location.search);
+const tag = urlParams.get('tag');
+
+// Seleciona o container onde as tarefas vão aparecer
+const tagTasksContainer = document.getElementById('tag-tasks');
+const tagTitle = document.getElementById('tag-title');
+
+if (tag && tagTasksContainer && tagTitle) {
+    // Atualiza o título da página
+    tagTitle.innerText = `Tarefas com a tag @${tag}`;
+
+    // Carrega as tarefas do localStorage
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    // Filtra as tarefas que contém a tag
+    const filteredTasks = tasks.filter(task => {
+        const taskTags = extractEtiquetas(task.title);
+        return taskTags.includes(tag);
+    });
+
+    // Gera o HTML das tarefas filtradas
+    if (filteredTasks.length === 0) {
+        tagTasksContainer.innerHTML = `<p class="empty-message">Nenhuma tarefa encontrada para a tag @${tag}</p>`;
+    } else {
+        tagTasksContainer.innerHTML = filteredTasks.map(task => `
+            <li class="task-item">
+                <div class="task-content">
+                    <strong class="task-title">${task.title}</strong>
+                    <div class="task-meta">
+                        <span class="badge badge-${task.priority}">${task.priority}</span>
+                        <small class="task-date">${formatDate(task.date)} ${task.time}</small>
+                    </div>
+                </div>
+            </li>
+        `).join('');
+    }
+}
 
 // Gerenciamento do tema
 const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -24,7 +63,7 @@ function loadTheme() {
 
 // Função para extrair etiquetas
 function extractEtiquetas(texto) {
-    const regex = /#(\w+)/g;
+    const regex = /@(\w+)/g;
     const matches = texto.match(regex);
     return matches ? matches.map(match => match.substring(1)) : [];
 }
@@ -123,13 +162,9 @@ function formatDate(dateString) {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-    const tagManager = new TagManager();
-    tagManager.init();
-
     // Inicializa o tema
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-
+    loadTheme();
+    
     // Adiciona evento de clique no botão de tema
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
@@ -140,13 +175,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Inicializa o gerenciador de etiquetas
+    const tagManager = new TagManager();
+    tagManager.init();
+
+    // Renderiza as etiquetas
     renderTags();
     showStats();
 });
 
-tagSearch.addEventListener('input', (e) => {
-    renderTags(e.target.value);
-});
+// Evento de busca de etiquetas
+if (tagSearch) {
+    tagSearch.addEventListener('input', (e) => {
+        renderTags(e.target.value);
+    });
+}
 
 // Gerenciamento de etiquetas
 class TagManager {
@@ -183,43 +226,34 @@ class TagManager {
     }
 
     updateStats() {
-        const totalTags = document.getElementById('total-tags');
-        const totalTasks = document.getElementById('total-tasks');
-        const mostUsedTag = document.getElementById('most-used-tag');
+        const totalTags = document.getElementById('totalTags');
+        const usedTags = document.getElementById('usedTags');
 
         if (totalTags) {
-            totalTags.textContent = this.tasks.length;
-        }
-
-        if (totalTasks) {
-            totalTasks.textContent = this.tasks.length;
-        }
-
-        if (mostUsedTag) {
-            let maxCount = 0;
-            let mostUsed = 'Nenhuma';
-            
+            // Conta o número total de etiquetas únicas
+            const allTags = new Set();
             this.tasks.forEach(task => {
                 const tags = extractEtiquetas(task.title);
-                tags.forEach(tag => {
-                    const count = this.getTagCount(tag);
-                    if (count > maxCount) {
-                        maxCount = count;
-                        mostUsed = tag;
-                    }
-                });
+                tags.forEach(tag => allTags.add(tag));
             });
+            totalTags.textContent = allTags.size;
+        }
 
-            mostUsedTag.textContent = mostUsed;
+        if (usedTags) {
+            // Conta quantas tarefas têm pelo menos uma etiqueta
+            const tasksWithTags = this.tasks.filter(task => 
+                extractEtiquetas(task.title).length > 0
+            ).length;
+            usedTags.textContent = tasksWithTags;
         }
     }
 
     renderTags() {
-        const tagsContainer = document.getElementById('tags-container');
+        const tagsContainer = document.getElementById('tagsList');
         if (!tagsContainer) return;
 
         tagsContainer.innerHTML = '';
-        const searchTerm = document.getElementById('tag-search')?.value.toLowerCase() || '';
+        const searchTerm = document.getElementById('tagSearch')?.value.toLowerCase() || '';
 
         this.tasks.forEach(task => {
             const tags = extractEtiquetas(task.title);
@@ -272,22 +306,22 @@ class TagManager {
     }
 
     renderFilteredTasks() {
-        const filteredTasksList = document.getElementById('filteredTasksList');
+        const filteredTasksList = document.getElementById('tag-tasks');
         if (!filteredTasksList) return;
 
         filteredTasksList.innerHTML = '';
 
         if (!this.selectedTag) {
-            filteredTasksList.innerHTML = '<p class="text-muted">Selecione uma etiqueta para ver as tarefas</p>';
+            filteredTasksList.innerHTML = '<p class="empty-message">Selecione uma etiqueta para ver as tarefas</p>';
             return;
         }
 
         const filteredTasks = this.tasks.filter(task => 
-            task.tags.includes(this.selectedTag)
+            extractEtiquetas(task.title).includes(this.selectedTag)
         );
 
         if (filteredTasks.length === 0) {
-            filteredTasksList.innerHTML = '<p class="text-muted">Nenhuma tarefa encontrada com esta etiqueta</p>';
+            filteredTasksList.innerHTML = '<p class="empty-message">Nenhuma tarefa encontrada com esta etiqueta</p>';
             return;
         }
 
@@ -296,11 +330,10 @@ class TagManager {
             taskElement.className = 'task-item';
             taskElement.innerHTML = `
                 <div class="task-content">
-                    <h5>${task.title}</h5>
-                    <p class="text-muted">${task.description || 'Sem descrição'}</p>
+                    <h5 class="task-title">${task.title}</h5>
                     <div class="task-meta">
-                        <span class="badge bg-${task.priority}">${task.priority}</span>
-                        <small>${new Date(task.date).toLocaleDateString()}</small>
+                        <span class="badge badge-${task.priority}">${task.priority}</span>
+                        <small class="task-date">${formatDate(task.date)} ${task.time}</small>
                     </div>
                 </div>
             `;
@@ -309,7 +342,7 @@ class TagManager {
     }
 
     setupEventListeners() {
-        const tagSearch = document.getElementById('tag-search');
+        const tagSearch = document.getElementById('tagSearch');
         if (tagSearch) {
             tagSearch.addEventListener('input', () => {
                 const searchTerm = tagSearch.value.toLowerCase();
@@ -317,7 +350,7 @@ class TagManager {
             });
         }
 
-        const tagsContainer = document.getElementById('tags-container');
+        const tagsContainer = document.getElementById('tagsList');
         if (tagsContainer) {
             tagsContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('delete-tag')) {

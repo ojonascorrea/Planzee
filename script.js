@@ -278,7 +278,7 @@ function createTaskHTML(title, date, time, completed, priority, category, etique
 
     // Cria as badges das etiquetas
     const etiquetasBadges = etiquetas.map(tag => 
-        `<span class="tag-badge" data-tag="${tag}">@${tag}</span>`
+        `<a href="tags.html?tag=${encodeURIComponent(tag)}" class="tag-badge" data-tag="${tag}">@${tag}</a>`
     ).join('');
 
     return `

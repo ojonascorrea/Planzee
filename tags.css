@@ -253,4 +253,59 @@
 .tags-link:active,
 #theme-toggle:active {
     transform: scale(0.98);
+}
+
+/* Estilos para etiquetas na página de etiquetas */
+.tag-badge {
+    background-color: var(--tag-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    margin: 4px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
+}
+
+.tag-badge:hover {
+    background-color: var(--tag-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para etiquetas selecionadas */
+.tag-badge.selected {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+/* Estilos para etiquetas em tarefas filtradas */
+.filtered-tasks-list .tag-badge {
+    margin: 0 4px;
+    font-size: 12px;
+    padding: 2px 8px;
+}
+
+/* Animações */
+@keyframes tagPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.tag-badge:active {
+    animation: tagPulse 0.3s ease;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .tag-badge {
+        padding: 3px 10px;
+        font-size: 12px;
+        margin: 3px;
+    }
 } 

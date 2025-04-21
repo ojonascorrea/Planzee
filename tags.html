@@ -9,7 +9,12 @@
 <body>
     <div class="container">
         <header>
-            <h1>Gerenciador de Etiquetas</h1>
+            <div class="header-left">
+                <a href="index.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Voltar para Home
+                </a>
+                <h1>Gerenciador de Etiquetas</h1>
+            </div>
             <button id="themeToggle" class="theme-toggle">
                 <i class="fas fa-moon"></i>
             </button>
@@ -40,8 +45,8 @@
         </div>
 
         <div class="filtered-tasks-container">
-            <h2>Tarefas Filtradas</h2>
-            <div class="filtered-tasks-list" id="filteredTasksList">
+            <h2 id="tag-title">Tarefas Filtradas</h2>
+            <div id="tag-tasks" class="filtered-tasks-list">
                 <!-- As tarefas filtradas serão renderizadas aqui -->
             </div>
         </div>
