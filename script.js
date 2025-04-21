@@ -98,15 +98,19 @@ function addTask(title, date, time, completed, priority) {
     });
 
     deleteBtn.addEventListener('click', function() {
-        li.remove();
-        saveTasks();
-    });
+        li.classList.add('fade-out');
+    
+        li.addEventListener('animationend', function() {
+            li.remove();
+            saveTasks();
+        }, { once: true });
+    });    
 
     if (completed) {
         li.classList.add('task-completed');
     }
 
-    taskList.appendChild(li);
+    taskList.prepend(li);
 }
 
 // Função para arrastar e soltar
