@@ -72,6 +72,15 @@ function setupEventListeners() {
     
     // Arrastar e soltar
     taskList.addEventListener('dragover', handleDragOver);
+    
+    // Toggle para tarefas concluídas
+    const completedTitle = document.getElementById('completed-title');
+    if (completedTitle) {
+        completedTitle.addEventListener('click', function() {
+            const completedTasks = document.getElementById('completed-tasks');
+            completedTasks.style.display = completedTasks.style.display === 'none' ? 'block' : 'none';
+        });
+    }
 }
 
 function setupTaskEventListeners(li) {
@@ -111,11 +120,28 @@ function setupTaskEventListeners(li) {
     
     // Checkbox
     const checkbox = li.querySelector('.complete-checkbox');
-    checkbox.addEventListener('change', () => {
+    checkbox.addEventListener('change', function() {
+        // Atualiza a classe visual imediatamente
         li.classList.toggle('task-completed', checkbox.checked);
+        
+        // Salva o estado e atualiza estatísticas
         saveTasks();
         updateProgress();
         createChart(generateProductivityData());
+        
+        // Move a tarefa para a seção apropriada
+        const completedTasksList = document.getElementById('completed-tasks');
+        if (completedTasksList) {
+            if (checkbox.checked) {
+                // Move para a lista de concluídas
+                completedTasksList.appendChild(li);
+            } else {
+                // Move de volta para a lista principal
+                taskList.appendChild(li);
+            }
+        }
+        
+        // Reaplica os filtros ativos
         applyFilters();
     });
     
@@ -247,6 +273,9 @@ function addTask(title, date, time, completed, priority, category = '') {
 
     const li = document.createElement('li');
     li.className = 'task-item';
+    if (completed) {
+        li.classList.add('task-completed');
+    }
     li.setAttribute('draggable', true);
     li.setAttribute('data-category', category || 'outros');
     li.setAttribute('data-date', `${date}T${time}`);
@@ -263,7 +292,15 @@ function addTask(title, date, time, completed, priority, category = '') {
     li.innerHTML = createTaskHTML(cleanTitle, date, time, completed, priority, category, etiquetas);
     
     setupTaskEventListeners(li);
-    taskList.prepend(li);
+    
+    // Adiciona a tarefa à lista apropriada
+    const completedTasksList = document.getElementById('completed-tasks');
+    if (completed && completedTasksList) {
+        completedTasksList.appendChild(li);
+    } else {
+        taskList.prepend(li);
+    }
+    
     saveTasks();
     updateTagSelect();
 }
@@ -363,11 +400,22 @@ function handleSearch() {
 }
 
 function applyFilters(searchText = '') {
-    const tasks = taskList.querySelectorAll('li');
+    // Aplica filtros na lista principal
+    applyFiltersToList(taskList, searchText, false);
+    
+    // Aplica filtros na lista de concluídas, se existir
+    const completedTasksList = document.getElementById('completed-tasks');
+    if (completedTasksList) {
+        applyFiltersToList(completedTasksList, searchText, true);
+    }
+}
+
+function applyFiltersToList(container, searchText, isCompletedList) {
+    const tasks = container.querySelectorAll('li');
     
     tasks.forEach(task => {
         const title = task.querySelector('.task-title').textContent.toLowerCase();
-        const isCompleted = task.querySelector('.complete-checkbox').checked;
+        const isCompleted = task.querySelector('.complete-checkbox').checked || isCompletedList;
         const taskDate = new Date(task.dataset.date);
         const taskCategory = task.getAttribute('data-category');
         const taskTags = Array.from(task.querySelectorAll('.tag-badge')).map(tag => 
@@ -436,7 +484,8 @@ function loadTheme() {
 
 // Armazenamento
 function saveTasks() {
-    const tasks = Array.from(taskList.children).map(li => {
+    // Coleta todas as tarefas da lista principal
+    const allTasks = Array.from(taskList.children).map(li => {
         const title = li.querySelector('.task-title').textContent;
         const tags = Array.from(li.querySelectorAll('.tag-badge')).map(tag => tag.textContent);
         const fullTitle = title + ' ' + tags.join(' ');
@@ -451,7 +500,29 @@ function saveTasks() {
         };
     });
     
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    // Adiciona as tarefas da lista de concluídas, se existir
+    const completedTasksList = document.getElementById('completed-tasks');
+    if (completedTasksList) {
+        const completedTasks = Array.from(completedTasksList.children).map(li => {
+            const title = li.querySelector('.task-title').textContent;
+            const tags = Array.from(li.querySelectorAll('.tag-badge')).map(tag => tag.textContent);
+            const fullTitle = title + ' ' + tags.join(' ');
+            
+            return {
+                title: fullTitle.trim(),
+                date: li.dataset.date.split('T')[0],
+                time: li.dataset.date.split('T')[1],
+                completed: true, // Sempre concluídas nesta lista
+                priority: li.querySelector('.badge').classList[1].split('-')[1],
+                category: li.getAttribute('data-category')
+            };
+        });
+        
+        // Combina as duas listas
+        allTasks.push(...completedTasks);
+    }
+    
+    localStorage.setItem('tasks', JSON.stringify(allTasks));
 }
 
 function loadTasks() {
@@ -484,16 +555,29 @@ function formatDate(dateString) {
 }
 
 function updateProgress() {
-    const tasks = taskList.querySelectorAll('li');
-    const completed = taskList.querySelectorAll('.complete-checkbox:checked');
+    // Conta todas as tarefas (principais e concluídas)
+    const mainTasks = taskList.querySelectorAll('li');
     
-    const total = tasks.length;
-    const done = completed.length;
+    // Adiciona tarefas concluídas da seção separada, se existir
+    const completedTasksList = document.getElementById('completed-tasks');
+    const completedTasks = completedTasksList ? completedTasksList.querySelectorAll('li') : [];
+    
+    // Calcula total e concluídas
+    const total = mainTasks.length + completedTasks.length;
+    const done = taskList.querySelectorAll('.complete-checkbox:checked').length + completedTasks.length;
     const percent = total > 0 ? Math.round((done / total) * 100) : 0;
     
-    document.getElementById('progress-bar').style.width = `${percent}%`;
-    document.getElementById('progress-text').textContent = 
-        `${done} de ${total} tarefas concluídas (${percent}%)`;
+    // Atualiza a barra de progresso
+    const progressBar = document.getElementById('progress-bar');
+    if (progressBar) {
+        progressBar.style.width = `${percent}%`;
+    }
+    
+    // Atualiza o texto de progresso
+    const progressText = document.getElementById('progress-text');
+    if (progressText) {
+        progressText.textContent = `${done} de ${total} tarefas concluídas (${percent}%)`;
+    }
 }
 
 // Gráfico

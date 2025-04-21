@@ -1078,3 +1078,28 @@ body.dark .category-select {
     background-size: 1em;
     padding-right: 2.5em;
 }
+
+#completed-section {
+    margin-top: 30px;
+    border-top: 2px solid #ccc;
+    padding-top: 20px;
+}
+
+#completed-title {
+    cursor: pointer;
+    color: #4CAF50;
+    user-select: none;
+}
+
+#completed-tasks {
+    margin-top: 10px;
+    list-style: none;
+    padding-left: 0;
+}
+
+#completed-tasks li {
+    background-color: #e6ffe6;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+}
