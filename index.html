@@ -3,44 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <title>Planzee - Gerenciador de Tarefas</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Planzee</h1>
-    <p>Planzee é um gerenciador de tarefas que ajuda você a planejar seu dia.</p>
-    <div class="progress-container">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
-    <p id="progress-text">0 de 0 tarefas concluídas</p>
-    
-
-    <button id="theme-toggle">🌙 Alternar Tema</button>
-    
-    
-
-    <form id="task-form">
-      <input type="text" id="task-title" placeholder="Nome da tarefa" required>
-      <input type="date" id="task-date" required>
-      <input type="time" id="task-time" required>
-      <select id="task-priority" required class="badge_priority">
-        <option value="alta">Alta Prioridade 🔥</option>
-        <option value="media" selected>Média Prioridade 📝</option>
-        <option value="baixa">Baixa Prioridade 💤</option>
-      </select>      
-      <button type="submit">Adicionar</button>
-    </form>
-
-    <input type="text" id="search-input" placeholder="Buscar tarefas..." />
-    
-    <div class="filters">
-      <button class="filter-btn active" data-filter="all">Todas</button>
-      <button class="filter-btn" data-filter="pending">Pendentes</button>
-      <button class="filter-btn" data-filter="completed">Concluídas</button>
+    <div class="dashboard-container">
+      <div class="dashboard-card">
+        <div class="header-container">
+          <h1>Planzee</h1>
+          <button id="theme-toggle">🌙 Alternar Tema</button>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p id="progress-text">0 de 0 tarefas concluídas</p>
+        <h2>Produtividade da Semana</h2>
+        <canvas id="productivity-chart" width="400" height="200"></canvas>
+      </div>
     </div>
 
-    <ul id="task-list"></ul>
+    <div class="tasks-container">
+      <form id="task-form">
+        <input type="text" id="task-title" placeholder="Nome da tarefa" required>
+        <input type="date" id="task-date" required>
+        <input type="time" id="task-time" required>
+        <select id="task-priority" required class="badge_priority">
+          <option value="alta">Alta Prioridade 🔥</option>
+          <option value="media" selected>Média Prioridade 📝</option>
+          <option value="baixa">Baixa Prioridade 💤</option>
+        </select>      
+        <button type="submit">Adicionar</button>
+      </form>
+
+      <input type="text" id="search-input" placeholder="Buscar tarefas..." />
+      
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">Todas</button>
+        <button class="filter-btn" data-filter="pending">Pendentes</button>
+        <button class="filter-btn" data-filter="completed">Concluídas</button>
+      </div>
+
+      <ul id="task-list"></ul>
+    </div>
   </div>
 
   <script src="script.js"></script>

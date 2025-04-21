@@ -2,13 +2,21 @@ const taskForm = document.getElementById('task-form');
 const taskList = document.getElementById('task-list');
 const filterButtons = document.querySelectorAll('.filter-btn');
 const themeToggle = document.getElementById('theme-toggle');
+let productivityChart;
 
 // Carrega tarefas e tema ao iniciar
 document.addEventListener('DOMContentLoaded', () => {
     loadTasks();
     loadTheme();
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
     fillDateTimeInputs(); // 🆕 Chama para preencher a data/hora automaticamente
+    updateProgress();
+    createChart(generateProductivityData());
 });
+
+setInterval(checkTasksForNotifications, 60000); // Checa a cada 1 minuto
 
 function fillDateTimeInputs() {
     const now = new Date();
@@ -41,6 +49,7 @@ taskForm.addEventListener('submit', function(e) {
     taskForm.reset();
     fillDateTimeInputs(); //Chama para preencher a data/hora automaticamente
     saveTasks();
+    createChart(generateProductivityData());
 });
 
 function addTask(title, date, time, completed, priority) {
@@ -97,6 +106,7 @@ function addTask(title, date, time, completed, priority) {
         li.classList.toggle('task-completed', this.checked);
         saveTasks();
         updateProgress();
+        createChart(generateProductivityData());
     });
 
     deleteBtn.addEventListener('click', function() {
@@ -106,7 +116,7 @@ function addTask(title, date, time, completed, priority) {
             li.remove();
             updateProgress();
             saveTasks();
-        
+            createChart(generateProductivityData());
         }, { once: true });
     });    
 
@@ -303,4 +313,90 @@ function updateProgress() {
 
     progressBar.style.width = `${percent}%`;
     progressText.textContent = `${done} de ${total} tarefas concluídas (${percent}%)`;
+}
+
+// Cria o gráfico de produtividade
+function createChart(data) {
+    const ctx = document.getElementById('productivity-chart').getContext('2d');
+
+    if (productivityChart) {
+        productivityChart.destroy(); // Destroi gráfico anterior para atualizar
+    }
+
+    productivityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Tarefas Concluídas',
+                data: data.values,
+                backgroundColor: '#4CAF50'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision:0
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Gera dados de produtividade do gráfico
+function generateProductivityData() {
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const today = new Date();
+    const labels = [];
+    const values = [];
+
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+
+        const formatted = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+
+        labels.push(formatted);
+
+        const completedTasks = tasks.filter(task => {
+            const taskDate = new Date(task.date);
+            return task.completed && isSameDay(taskDate, date);
+        }).length;
+
+        values.push(completedTasks);
+    }
+
+    return { labels, values };
+}
+
+function isSameDay(date1, date2) {
+    return (
+        date1.getFullYear() === date2.getFullYear() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getDate() === date2.getDate()
+    );
+}
+
+function checkTasksForNotifications() {
+    if (Notification.permission !== "granted") return;
+
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const now = new Date();
+
+    tasks.forEach(task => {
+        if (!task.completed) {
+            const taskDateTime = new Date(`${task.date}T${task.time}`);
+            const diffMinutes = (taskDateTime - now) / 60000;
+
+            if (diffMinutes >= 0 && diffMinutes <= 5) {
+                new Notification("Lembrete de Tarefa 🛎️", {
+                    body: `Hora de: ${task.title} (${task.time})`,
+                    icon: "icon-192.png" // Usa o ícone que criamos para o app
+                });
+            }
+        }
+    });
 }

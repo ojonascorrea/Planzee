@@ -22,18 +22,49 @@ body {
 }
 
 .container {
-    max-width: 500px;
+    max-width: 1200px;
     margin: auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.dashboard-container {
+    display: flex;
+    justify-content: center;
+}
+
+.dashboard-card {
     background: var(--container-bg);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    animation: fadeIn 1s ease;
-    transition: background 0.3s;
+    width: 100%;
+    max-width: 500px;
+}
+
+.tasks-container {
+    background: var(--container-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 h1 {
-    text-align: center;
+    margin: 0;
+    text-align: left;
 }
 
 #theme-toggle {
@@ -43,9 +74,9 @@ h1 {
     padding: 8px 12px;
     border-radius: 20px;
     cursor: pointer;
-    margin: 10px auto;
-    display: block;
     transition: background 0.3s, color 0.3s;
+    float: none;
+    margin: 0;
 }
 
 #theme-toggle:hover {
@@ -56,25 +87,53 @@ h1 {
 form {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 20px;
+    border-radius: 12px;
+    box-sizing: border-box;
 }
 
-input, button {
-    padding: 10px;
-    font-size: 16px;
+input, select, button {
+    padding: 12px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+input, select {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #000000;
+}
+
+input::placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
 button {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
     color: white;
-    border: none;
+    font-weight: 500;
     cursor: pointer;
-    transition: background 0.3s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
-    background-color: #45a049;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+    transform: translateY(0);
 }
 
 ul {
@@ -133,26 +192,31 @@ li {
 .filters {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
     gap: 10px;
+    background: rgba(0, 0, 0, 0.02);
+    padding: 15px;
+    border-radius: 12px;
 }
 
 .filter-btn {
-    padding: 8px 12px;
+    padding: 8px 16px;
     border: none;
-    background: #ccc;
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-color);
     cursor: pointer;
-    border-radius: 4px;
-    transition: background 0.3s;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
 }
 
 .filter-btn:hover {
-    background: #bbb;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .filter-btn.active {
-    background: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
     color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes fadeIn {
@@ -167,10 +231,48 @@ li {
 }
 
 .badge_priority {
-    padding: 10px 10px;
-    border-radius: 5px;
-    font-size: 12px;
-    background-color: #e5ab3e; /* Vermelho forte */
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border: 2px solid #4CAF50;
+    color: #ffffff;
+    font-weight: 500;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+    padding-right: 2.5em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.badge_priority:hover {
+    background: linear-gradient(135deg, #45a049, #4CAF50);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge_priority option {
+    background: white;
+    color: #000000;
+    padding: 10px;
+}
+
+.badge_priority option[value="alta"] {
+    background: #feb2b2;
+    color: #000000;
+}
+
+.badge_priority option[value="media"] {
+    background: #fbd38d;
+    color: #000000;
+}
+
+.badge_priority option[value="baixa"] {
+    background: #9ae6b4;
+    color: #000000;
 }
 
 .badge {
@@ -195,17 +297,27 @@ li {
 
 #search-input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
+    padding: 12px 15px;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    font-size: 14px;
+    background: rgba(0, 0, 0, 0.02);
+    transition: all 0.3s ease;
     box-sizing: border-box;
+    margin: 0;
+    color: #ffffff;
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+#search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
 }
 
 #search-input:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: #45a049;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    background-color: rgba(76, 175, 80, 0.15);
 }
 
 .dragging {
@@ -249,24 +361,61 @@ li {
 /* Barra de progresso */
 .progress-container {
     width: 100%;
-    background: #e2e8f0;
-    border-radius: 6px;
-    height: 20px;
-    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    height: 8px;
+    margin: 20px 0;
     overflow: hidden;
+    position: relative;
 }
 
 .progress-bar {
     height: 100%;
-    background: #4CAF50;
+    background: linear-gradient(90deg, #4CAF50, #45a049);
     width: 0%;
-    transition: width 0.3s ease;
+    transition: width 0.5s ease;
+    border-radius: 12px;
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 #progress-text {
     text-align: center;
     font-size: 14px;
-    margin-bottom: 20px;
+    margin: 8px 0 20px;
     color: var(--text-color);
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-card {
+        max-width: 100%;
+    }
 }
 
