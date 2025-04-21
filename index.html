@@ -3,20 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ToDo List Melhorada com Tema</title>
+  <title>Planzee - Gerenciador de Tarefas</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Minha ToDo List</h1>
+    <h1>Planzee</h1>
+    <p>Planzee é um gerenciador de tarefas que ajuda você a planejar seu dia.</p>
 
     <button id="theme-toggle">🌙 Alternar Tema</button>
+    
+    
 
     <form id="task-form">
       <input type="text" id="task-title" placeholder="Nome da tarefa" required>
       <input type="date" id="task-date" required>
       <input type="time" id="task-time" required>
-      <select id="task-priority" required>
+      <select id="task-priority" required class="badge_priority">
         <option value="alta">Alta Prioridade 🔥</option>
         <option value="media" selected>Média Prioridade 📝</option>
         <option value="baixa">Baixa Prioridade 💤</option>
@@ -24,6 +27,8 @@
       <button type="submit">Adicionar</button>
     </form>
 
+    <input type="text" id="search-input" placeholder="Buscar tarefas..." />
+    
     <div class="filters">
       <button class="filter-btn active" data-filter="all">Todas</button>
       <button class="filter-btn" data-filter="pending">Pendentes</button>

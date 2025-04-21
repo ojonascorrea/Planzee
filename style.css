@@ -166,6 +166,13 @@ li {
     }
 }
 
+.badge_priority {
+    padding: 10px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    background-color: #e5ab3e; /* Vermelho forte */
+}
+
 .badge {
     padding: 5px 10px;
     border-radius: 20px;
@@ -184,6 +191,21 @@ li {
 
 .badge-baixa {
     background-color: #38a169; /* Verde */
+}
+
+#search-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: #4CAF50;
 }
 
 

@@ -205,3 +205,20 @@ function updateThemeIcon() {
         themeToggle.textContent = '🌙 Alternar Tema';
     }
 }
+
+const searchInput = document.getElementById('search-input');
+
+searchInput.addEventListener('input', function() {
+    const searchText = this.value.toLowerCase();
+    const tasks = taskList.querySelectorAll('li');
+
+    tasks.forEach(task => {
+        const title = task.querySelector('.task-title').textContent.toLowerCase();
+        if (title.includes(searchText)) {
+            task.style.display = 'flex';
+        } else {
+            task.style.display = 'none';
+        }
+    });
+});
+
