@@ -44,6 +44,15 @@ taskForm.addEventListener('submit', function(e) {
 
 function addTask(title, date, time, completed, priority) {
     const li = document.createElement('li');
+    li.setAttribute('draggable', true);
+    li.addEventListener('dragstart', function (e) {
+        li.classList.add('dragging');
+    });
+    
+    li.addEventListener('dragend', function (e) {
+        li.classList.remove('dragging');
+        saveTasks(); // Salva nova ordem após mover
+    });
 
     li.innerHTML = `
         <span class="task-info">
@@ -100,7 +109,36 @@ function addTask(title, date, time, completed, priority) {
     taskList.appendChild(li);
 }
 
-// 🛠️ Função para finalizar edição
+// Função para arrastar e soltar
+taskList.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    const draggingItem = document.querySelector('.dragging');
+    const afterElement = getDragAfterElement(taskList, e.clientY);
+
+    if (afterElement == null) {
+        taskList.appendChild(draggingItem);
+    } else {
+        taskList.insertBefore(draggingItem, afterElement);
+    }
+});
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+
+// Função para finalizar edição
 function finishEditing(input, li) {
     const newTitle = input.value.trim() || "Sem título";
 

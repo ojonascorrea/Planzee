@@ -208,4 +208,6 @@ li {
     border-color: #4CAF50;
 }
 
-
+.dragging {
+    opacity: 0.5;
+}
