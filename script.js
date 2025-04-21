@@ -36,6 +36,7 @@ taskForm.addEventListener('submit', function(e) {
     const priority = document.getElementById('task-priority').value;
 
     addTask(title, date, time, false, priority);
+    updateProgress();
 
     taskForm.reset();
     fillDateTimeInputs(); //Chama para preencher a data/hora automaticamente
@@ -95,6 +96,7 @@ function addTask(title, date, time, completed, priority) {
     checkbox.addEventListener('change', function() {
         li.classList.toggle('task-completed', this.checked);
         saveTasks();
+        updateProgress();
     });
 
     deleteBtn.addEventListener('click', function() {
@@ -102,7 +104,9 @@ function addTask(title, date, time, completed, priority) {
     
         li.addEventListener('animationend', function() {
             li.remove();
+            updateProgress();
             saveTasks();
+        
         }, { once: true });
     });    
 
@@ -202,6 +206,7 @@ function loadTasks() {
 
     tasks.forEach(task => {
         addTask(task.title, task.date, task.time, task.completed, task.priority);
+        updateProgress();
     });
 }
 
@@ -283,3 +288,19 @@ searchInput.addEventListener('input', function() {
     });
 });
 
+// Atualiza a barra de progresso
+function updateProgress() {
+    const tasks = taskList.querySelectorAll('li');
+    const completed = taskList.querySelectorAll('.complete-checkbox:checked');
+
+    const total = tasks.length;
+    const done = completed.length;
+
+    const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+
+    progressBar.style.width = `${percent}%`;
+    progressText.textContent = `${done} de ${total} tarefas concluídas (${percent}%)`;
+}
