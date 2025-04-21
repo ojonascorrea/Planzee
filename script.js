@@ -42,17 +42,18 @@ taskForm.addEventListener('submit', function(e) {
     const date = document.getElementById('task-date').value;
     const time = document.getElementById('task-time').value;
     const priority = document.getElementById('task-priority').value;
+    const category = document.getElementById('task-category').value.trim();
 
-    addTask(title, date, time, false, priority);
+    addTask(title, date, time, false, priority, category);
     updateProgress();
 
     taskForm.reset();
-    fillDateTimeInputs(); //Chama para preencher a data/hora automaticamente
+    fillDateTimeInputs();
     saveTasks();
     createChart(generateProductivityData());
 });
 
-function addTask(title, date, time, completed, priority) {
+function addTask(title, date, time, completed, priority, category = '') {
     const li = document.createElement('li');
     li.setAttribute('draggable', true);
     li.addEventListener('dragstart', function (e) {
@@ -61,12 +62,13 @@ function addTask(title, date, time, completed, priority) {
     
     li.addEventListener('dragend', function (e) {
         li.classList.remove('dragging');
-        saveTasks(); // Salva nova ordem após mover
+        saveTasks();
     });
 
     li.innerHTML = `
         <span class="task-info">
             <span class="badge badge-${priority}">${priority.toUpperCase()}</span>
+            ${category ? `<span class="category-badge">${category}</span>` : ''}
             <strong class="task-title">${title}</strong> - 
             <small>${formatDate(date)} às ${time}</small>
         </span>
@@ -202,7 +204,8 @@ function saveTasks() {
         const time = timeText;
         const completed = li.querySelector('.complete-checkbox').checked;
         const priority = li.querySelector('.badge').textContent.toLowerCase();
-        tasks.push({ title, date, time, completed, priority });
+        const category = li.querySelector('.category-badge')?.textContent || '';
+        tasks.push({ title, date, time, completed, priority, category });
     });
 
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -215,7 +218,7 @@ function loadTasks() {
     const tasks = JSON.parse(storedTasks);
 
     tasks.forEach(task => {
-        addTask(task.title, task.date, task.time, task.completed, task.priority);
+        addTask(task.title, task.date, task.time, task.completed, task.priority, task.category);
         updateProgress();
     });
 }
