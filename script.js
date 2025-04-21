@@ -7,7 +7,25 @@ const themeToggle = document.getElementById('theme-toggle');
 document.addEventListener('DOMContentLoaded', () => {
     loadTasks();
     loadTheme();
+    fillDateTimeInputs(); // 🆕 Chama para preencher a data/hora automaticamente
 });
+
+function fillDateTimeInputs() {
+    const now = new Date();
+
+    const dateInput = document.getElementById('task-date');
+    const timeInput = document.getElementById('task-time');
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // mês começa em 0
+    const day = String(now.getDate()).padStart(2, '0');
+
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    dateInput.value = `${year}-${month}-${day}`;
+    timeInput.value = `${hours}:${minutes}`;
+}
 
 taskForm.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -20,6 +38,7 @@ taskForm.addEventListener('submit', function(e) {
     addTask(title, date, time, false, priority);
 
     taskForm.reset();
+    fillDateTimeInputs(); //Chama para preencher a data/hora automaticamente
     saveTasks();
 });
 
