@@ -15,18 +15,20 @@ taskForm.addEventListener('submit', function(e) {
     const title = document.getElementById('task-title').value;
     const date = document.getElementById('task-date').value;
     const time = document.getElementById('task-time').value;
+    const priority = document.getElementById('task-priority').value;
 
-    addTask(title, date, time, false);
+    addTask(title, date, time, false, priority);
 
     taskForm.reset();
     saveTasks();
 });
 
-function addTask(title, date, time, completed) {
+function addTask(title, date, time, completed, priority) {
     const li = document.createElement('li');
 
     li.innerHTML = `
         <span class="task-info">
+            <span class="badge badge-${priority}">${priority.toUpperCase()}</span>
             <strong class="task-title">${title}</strong> - 
             <small>${formatDate(date)} às ${time}</small>
         </span>
@@ -124,17 +126,21 @@ function saveTasks() {
         const date = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
         const time = timeText;
         const completed = li.querySelector('.complete-checkbox').checked;
-        tasks.push({ title, date, time, completed });
+        const priority = li.querySelector('.badge').textContent.toLowerCase();
+        tasks.push({ title, date, time, completed, priority });
     });
 
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 function loadTasks() {
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const storedTasks = localStorage.getItem('tasks');
+    if (!storedTasks) return;
+
+    const tasks = JSON.parse(storedTasks);
 
     tasks.forEach(task => {
-        addTask(task.title, task.date, task.time, task.completed);
+        addTask(task.title, task.date, task.time, task.completed, task.priority);
     });
 }
 

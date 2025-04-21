@@ -165,3 +165,25 @@ li {
         transform: translateY(0);
     }
 }
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-right: 10px;
+    color: white;
+}
+
+.badge-alta {
+    background-color: #e53e3e; /* Vermelho forte */
+}
+
+.badge-media {
+    background-color: #3182ce; /* Azul */
+}
+
+.badge-baixa {
+    background-color: #38a169; /* Verde */
+}
+
+
