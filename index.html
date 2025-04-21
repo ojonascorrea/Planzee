@@ -13,7 +13,10 @@
       <div class="dashboard-card">
         <div class="header-container">
           <h1>Planzee</h1>
-          <button id="theme-toggle">🌙 Alternar Tema</button>
+          <div class="header-actions">
+            <a href="tags.html" class="tags-link">Gerenciar Etiquetas 🏷️</a>
+            <button id="theme-toggle">🌙 Alternar Tema</button>
+          </div>
         </div>
         <div class="progress-container">
           <div class="progress-bar" id="progress-bar"></div>
@@ -28,6 +31,9 @@
           <div id="category-filters">
             <select id="category-select" class="category-select">
               <option value="all">Todas as categorias</option>
+            </select>
+            <select id="tag-select" class="category-select">
+              <option value="all">Todas as etiquetas</option>
             </select>
           </div>
           <div id="period-filters">

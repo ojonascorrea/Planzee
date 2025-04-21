@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Etiquetas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gerenciador de Etiquetas</h1>
+            <button id="themeToggle" class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="tags-container">
+            <div class="tags-header">
+                <h2>Etiquetas</h2>
+                <div class="search-container">
+                    <input type="text" id="tagSearch" placeholder="Buscar etiquetas...">
+                </div>
+            </div>
+
+            <div class="tags-stats">
+                <div class="stat-card">
+                    <h3>Total de Etiquetas</h3>
+                    <p id="totalTags">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Etiquetas em Uso</h3>
+                    <p id="usedTags">0</p>
+                </div>
+            </div>
+
+            <div class="tags-list" id="tagsList">
+                <!-- As etiquetas serão renderizadas aqui -->
+            </div>
+        </div>
+
+        <div class="filtered-tasks-container">
+            <h2>Tarefas Filtradas</h2>
+            <div class="filtered-tasks-list" id="filteredTasksList">
+                <!-- As tarefas filtradas serão renderizadas aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="tags.js"></script>
+</body>
+</html> 

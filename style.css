@@ -199,7 +199,18 @@ ul {
 .task-badges {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tag-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    margin-left: 4px;
+    font-weight: 500;
 }
 
 .badge {

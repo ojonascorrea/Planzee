@@ -7,6 +7,7 @@ const searchInput = document.getElementById('search-input');
 const sortByDateBtn = document.getElementById('sort-by-date-btn');
 const periodButtons = document.querySelectorAll('.period-btn');
 const categorySelect = document.getElementById('category-select');
+const tagSelect = document.getElementById('tag-select');
 const editModal = document.getElementById('edit-modal');
 const editModalForm = document.getElementById('edit-modal-form');
 const modalClose = document.querySelector('.modal-close');
@@ -17,6 +18,7 @@ let currentEditingTask = null;
 let currentFilter = 'all';
 let currentPeriod = 'semana';
 let currentCategory = 'all';
+let currentTag = 'all';
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgress();
     createChart(generateProductivityData());
     updateCategorySelect();
+    updateTagSelect();
     
     // Define o botão da semana como ativo por padrão
     document.querySelector('.period-btn[data-period="semana"]').classList.add('active');
@@ -63,6 +66,9 @@ function setupEventListeners() {
     
     // Categoria
     categorySelect.addEventListener('change', handleCategoryChange);
+    
+    // Etiquetas
+    tagSelect.addEventListener('change', handleTagChange);
     
     // Arrastar e soltar
     taskList.addEventListener('dragover', handleDragOver);
@@ -220,9 +226,25 @@ function handleTaskSubmit(e) {
     updateProgress();
     createChart(generateProductivityData());
     updateCategorySelect();
+    updateTagSelect();
+}
+
+function extractEtiquetas(title) {
+    const regex = /@(\w+)/g;
+    const matches = title.match(regex);
+    return matches ? matches.map(match => match.substring(1)) : [];
 }
 
 function addTask(title, date, time, completed, priority, category = '') {
+    // Processa as etiquetas
+    const etiquetas = extractEtiquetas(title);
+    let cleanTitle = title;
+
+    // Se quiser remover as @etiquetas do título que aparece
+    if (etiquetas.length > 0) {
+        cleanTitle = cleanTitle.replace(new RegExp(`@(${etiquetas.join('|')})`, 'g'), '').trim();
+    }
+
     const li = document.createElement('li');
     li.className = 'task-item';
     li.setAttribute('draggable', true);
@@ -237,21 +259,35 @@ function addTask(title, date, time, completed, priority, category = '') {
         li.classList.add('overdue');
     }
     
-    li.innerHTML = createTaskHTML(title, date, time, completed, priority, category);
+    // Usa cleanTitle ao invés de title
+    li.innerHTML = createTaskHTML(cleanTitle, date, time, completed, priority, category, etiquetas);
     
     setupTaskEventListeners(li);
     taskList.prepend(li);
     saveTasks();
+    updateTagSelect();
 }
 
 // Função auxiliar para criar o HTML da tarefa
-function createTaskHTML(title, date, time, completed, priority, category) {
+function createTaskHTML(title, date, time, completed, priority, category, etiquetas = []) {
+    // Extrai e remove as etiquetas do título
+    let cleanTitle = title;
+    etiquetas.forEach(tag => {
+        cleanTitle = cleanTitle.replace(`@${tag}`, '').trim();
+    });
+
+    // Cria as badges das etiquetas
+    const etiquetasBadges = etiquetas.map(tag => 
+        `<span class="tag-badge" data-tag="${tag}">@${tag}</span>`
+    ).join('');
+
     return `
         <div class="task-info">
             <div class="task-header">
                 <div class="task-badges">
                     <span class="badge badge-${priority}">${priority.toUpperCase()}</span>
                     ${category ? `<span class="category-badge">${category}</span>` : ''}
+                    ${etiquetasBadges}
                 </div>
                 <div class="task-actions">
                     <input type="checkbox" class="complete-checkbox" ${completed ? 'checked' : ''}>
@@ -260,7 +296,7 @@ function createTaskHTML(title, date, time, completed, priority, category) {
                 </div>
             </div>
             <div class="task-content">
-                <strong class="task-title">${title}</strong>
+                <strong class="task-title">${cleanTitle}</strong>
                 <div class="datetime-container">
                     <span class="task-date">${formatDate(date)}</span>
                     <span class="task-time">${time}</span>
@@ -316,6 +352,11 @@ function handleCategoryChange() {
     applyFilters();
 }
 
+function handleTagChange() {
+    currentTag = this.value;
+    applyFilters();
+}
+
 function handleSearch() {
     const searchText = this.value.toLowerCase();
     applyFilters(searchText);
@@ -329,6 +370,9 @@ function applyFilters(searchText = '') {
         const isCompleted = task.querySelector('.complete-checkbox').checked;
         const taskDate = new Date(task.dataset.date);
         const taskCategory = task.getAttribute('data-category');
+        const taskTags = Array.from(task.querySelectorAll('.tag-badge')).map(tag => 
+            tag.getAttribute('data-tag')
+        );
         
         let shouldShow = true;
         
@@ -353,6 +397,11 @@ function applyFilters(searchText = '') {
         
         // Aplica filtro de categoria
         if (shouldShow && currentCategory !== 'all' && taskCategory !== currentCategory) {
+            shouldShow = false;
+        }
+        
+        // Aplica filtro de etiqueta
+        if (shouldShow && currentTag !== 'all' && !taskTags.includes(currentTag)) {
             shouldShow = false;
         }
         
@@ -387,14 +436,20 @@ function loadTheme() {
 
 // Armazenamento
 function saveTasks() {
-    const tasks = Array.from(taskList.children).map(li => ({
-        title: li.querySelector('.task-title').textContent,
-        date: li.dataset.date.split('T')[0],
-        time: li.dataset.date.split('T')[1],
-        completed: li.querySelector('.complete-checkbox').checked,
-        priority: li.querySelector('.badge').classList[1].split('-')[1],
-        category: li.getAttribute('data-category')
-    }));
+    const tasks = Array.from(taskList.children).map(li => {
+        const title = li.querySelector('.task-title').textContent;
+        const tags = Array.from(li.querySelectorAll('.tag-badge')).map(tag => tag.textContent);
+        const fullTitle = title + ' ' + tags.join(' ');
+        
+        return {
+            title: fullTitle.trim(),
+            date: li.dataset.date.split('T')[0],
+            time: li.dataset.date.split('T')[1],
+            completed: li.querySelector('.complete-checkbox').checked,
+            priority: li.querySelector('.badge').classList[1].split('-')[1],
+            category: li.getAttribute('data-category')
+        };
+    });
     
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
@@ -538,6 +593,27 @@ function updateCategorySelect() {
     });
 }
 
+// Etiquetas
+function updateTagSelect() {
+    const tasks = Array.from(taskList.querySelectorAll('li'));
+    const tags = new Set();
+    
+    tasks.forEach(task => {
+        const etiquetas = Array.from(task.querySelectorAll('.tag-badge')).map(tag => 
+            tag.textContent.replace('@', '').trim()
+        );
+        etiquetas.forEach(tag => tags.add(tag));
+    });
+    
+    tagSelect.innerHTML = '<option value="all">Todas as etiquetas</option>';
+    Array.from(tags).sort().forEach(tag => {
+        const option = document.createElement('option');
+        option.value = tag;
+        option.textContent = '@' + tag;
+        tagSelect.appendChild(option);
+    });
+}
+
 // Notificações
 setInterval(checkTasksForNotifications, 60000);
 
@@ -561,5 +637,8 @@ function checkTasksForNotifications() {
         }
     });
 }
+
+
+
 
 
