@@ -153,7 +153,7 @@ ul {
     padding: 0;
 }
 
-li {
+.task-item {
     background: var(--task-bg);
     margin-bottom: 10px;
     padding: 10px;
@@ -162,7 +162,28 @@ li {
     justify-content: space-between;
     align-items: center;
     animation: fadeIn 0.5s ease;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.task-item.overdue {
+    border-left-color: #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+.task-item.overdue .task-title {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.task-item.overdue .badge {
+    background-color: #e74c3c !important;
+    color: white;
+}
+
+.task-item.overdue small {
+    color: #e74c3c;
+    font-weight: 500;
 }
 
 .task-title {

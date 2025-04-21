@@ -86,9 +86,18 @@ function handleTaskSubmit(e) {
 
 function addTask(title, date, time, completed, priority, category = '') {
     const li = document.createElement('li');
+    li.className = 'task-item';
     li.setAttribute('draggable', true);
     li.setAttribute('data-category', category || 'outros');
     li.setAttribute('data-date', `${date}T${time}`);
+    
+    // Verifica se a tarefa está atrasada
+    const taskDateTime = new Date(`${date}T${time}`);
+    const now = new Date();
+    
+    if (taskDateTime < now && !completed) {
+        li.classList.add('overdue');
+    }
     
     li.innerHTML = `
         <span class="task-info">
