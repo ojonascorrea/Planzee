@@ -610,3 +610,48 @@ body.dark .category-select {
 #sort-by-date-btn:active {
     transform: translateY(0);
 }
+
+#period-filters {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#period-filters .period-btn {
+    padding: 8px 16px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#period-filters .period-btn:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+#period-filters .period-btn.active {
+    background: var(--accent-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 480px) {
+    #period-filters {
+        gap: 8px;
+    }
+    
+    #period-filters .period-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}
