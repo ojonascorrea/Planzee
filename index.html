@@ -43,15 +43,16 @@
     <div class="tasks-container">
       <form id="task-form">
         <input type="text" id="task-title" placeholder="Nome da tarefa" required>
-        <input type="date" id="task-date" required>
-        <input type="time" id="task-time" required>
+        <div class="input-group">
+          <input type="date" id="task-date" required>
+          <input type="time" id="task-time" required>
+          <select id="task-priority" required class="badge_priority">
+            <option value="alta">Alta Prioridade 🔥</option>
+            <option value="media" selected>Média Prioridade 📝</option>
+            <option value="baixa">Baixa Prioridade 💤</option>
+          </select>
+        </div>
          
-        <select id="task-priority" required class="badge_priority">
-          <option value="alta">Alta Prioridade 🔥</option>
-          <option value="media" selected>Média Prioridade 📝</option>
-          <option value="baixa">Baixa Prioridade 💤</option>
-        </select>
-
         <div class="category-container">
           <input type="text" id="task-category" placeholder="Digite a categoria (opcional)" class="category-input">
         </div>

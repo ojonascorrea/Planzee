@@ -99,22 +99,37 @@ function addTask(title, date, time, completed, priority, category = '') {
         li.classList.add('overdue');
     }
     
-    li.innerHTML = `
-        <span class="task-info">
-            <span class="badge badge-${priority}">${priority.toUpperCase()}</span>
-            ${category ? `<span class="category-badge">${category}</span>` : ''}
-            <strong class="task-title">${title}</strong> - 
-            <small>${formatDate(date)} às ${time}</small>
-        </span>
-        <div class="actions">
-            <input type="checkbox" class="complete-checkbox" ${completed ? 'checked' : ''}>
-            <button class="delete-btn">🗑️</button>
-        </div>
-    `;
+    li.innerHTML = createTaskHTML(title, date, time, completed, priority, category);
     
     setupTaskEventListeners(li);
     taskList.prepend(li);
     saveTasks();
+}
+
+// Função auxiliar para criar o HTML da tarefa
+function createTaskHTML(title, date, time, completed, priority, category) {
+    return `
+        <div class="task-info">
+            <div class="task-header">
+                <div class="task-badges">
+                    <span class="badge badge-${priority}">${priority.toUpperCase()}</span>
+                    ${category ? `<span class="category-badge">${category}</span>` : ''}
+                </div>
+                <div class="task-actions">
+                    <input type="checkbox" class="complete-checkbox" ${completed ? 'checked' : ''}>
+                    <button class="edit-btn" title="Editar">✏️</button>
+                    <button class="delete-btn" title="Excluir">🗑️</button>
+                </div>
+            </div>
+            <div class="task-content">
+                <strong class="task-title">${title}</strong>
+                <div class="datetime-container">
+                    <span class="task-date">${formatDate(date)}</span>
+                    <span class="task-time">${time}</span>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function setupTaskEventListeners(li) {
@@ -129,6 +144,92 @@ function setupTaskEventListeners(li) {
     const titleElement = li.querySelector('.task-title');
     titleElement.addEventListener('click', () => startEditingTitle(titleElement, li));
     
+    // Botão de edição
+    const editBtn = li.querySelector('.edit-btn');
+    editBtn.addEventListener('click', () => {
+        const taskInfo = li.querySelector('.task-info');
+        const currentTitle = titleElement.textContent;
+        const currentDate = li.dataset.date.split('T')[0];
+        const currentTime = li.dataset.date.split('T')[1];
+        const currentPriority = li.querySelector('.badge').classList[1].split('-')[1];
+        const currentCategory = li.getAttribute('data-category');
+        
+        // Salva o HTML original da taskInfo
+        const originalTaskInfoHTML = taskInfo.outerHTML;
+        
+        // Cria formulário de edição
+        const editForm = document.createElement('form');
+        editForm.className = 'edit-form';
+        editForm.innerHTML = `
+            <input type="text" class="edit-title" value="${currentTitle}" required>
+            <input type="date" class="edit-date" value="${currentDate}" required>
+            <input type="time" class="edit-time" value="${currentTime}" required>
+            <select class="edit-priority">
+                <option value="alta" ${currentPriority === 'alta' ? 'selected' : ''}>Alta Prioridade</option>
+                <option value="media" ${currentPriority === 'media' ? 'selected' : ''}>Média Prioridade</option>
+                <option value="baixa" ${currentPriority === 'baixa' ? 'selected' : ''}>Baixa Prioridade</option>
+            </select>
+            <input type="text" class="edit-category" value="${currentCategory === 'outros' ? '' : currentCategory}" placeholder="Categoria (opcional)">
+            <div class="edit-actions">
+                <button type="submit" class="save-btn">Salvar</button>
+                <button type="button" class="cancel-btn">Cancelar</button>
+            </div>
+        `;
+        
+        // Substitui o conteúdo da tarefa pelo formulário
+        taskInfo.replaceWith(editForm);
+        
+        // Evento de submit do formulário
+        editForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newTitle = editForm.querySelector('.edit-title').value;
+            const newDate = editForm.querySelector('.edit-date').value;
+            const newTime = editForm.querySelector('.edit-time').value;
+            const newPriority = editForm.querySelector('.edit-priority').value;
+            const newCategory = editForm.querySelector('.edit-category').value.trim();
+            
+            // Atualiza os dados da tarefa
+            li.dataset.date = `${newDate}T${newTime}`;
+            li.setAttribute('data-category', newCategory || 'outros');
+            
+            // Cria o novo HTML da tarefa
+            const newTaskInfo = document.createElement('div');
+            newTaskInfo.className = 'task-info';
+            newTaskInfo.innerHTML = createTaskHTML(newTitle, newDate, newTime, li.querySelector('.complete-checkbox')?.checked || false, newPriority, newCategory);
+            
+            // Substitui o formulário pelo novo conteúdo
+            editForm.replaceWith(newTaskInfo);
+            
+            // Verifica se a tarefa está atrasada
+            const taskDateTime = new Date(`${newDate}T${newTime}`);
+            const now = new Date();
+            if (taskDateTime < now && !li.querySelector('.complete-checkbox').checked) {
+                li.classList.add('overdue');
+            } else {
+                li.classList.remove('overdue');
+            }
+            
+            // Reaplica os event listeners
+            setupTaskEventListeners(li);
+            
+            saveTasks();
+            updateProgress();
+            createChart(generateProductivityData());
+            updateCategorySelect();
+            applyFilters();
+        });
+        
+        // Evento de cancelar
+        editForm.querySelector('.cancel-btn').addEventListener('click', () => {
+            // Restaura o conteúdo original
+            const originalTaskInfo = document.createElement('div');
+            originalTaskInfo.className = 'task-info';
+            originalTaskInfo.innerHTML = originalTaskInfoHTML;
+            editForm.replaceWith(originalTaskInfo);
+            setupTaskEventListeners(li);
+        });
+    });
+    
     // Checkbox
     const checkbox = li.querySelector('.complete-checkbox');
     checkbox.addEventListener('change', () => {
@@ -136,6 +237,7 @@ function setupTaskEventListeners(li) {
         saveTasks();
         updateProgress();
         createChart(generateProductivityData());
+        applyFilters();
     });
     
     // Botão de deletar
@@ -147,6 +249,8 @@ function setupTaskEventListeners(li) {
             saveTasks();
             updateProgress();
             createChart(generateProductivityData());
+            updateCategorySelect();
+            applyFilters();
         }, { once: true });
     });
 }
