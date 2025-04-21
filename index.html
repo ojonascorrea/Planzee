@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToDo List Melhorada com Tema</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Minha ToDo List</h1>
+
+    <button id="theme-toggle">🌙 Alternar Tema</button>
+
+    <form id="task-form">
+      <input type="text" id="task-title" placeholder="Nome da tarefa" required>
+      <input type="date" id="task-date" required>
+      <input type="time" id="task-time" required>
+      <button type="submit">Adicionar</button>
+    </form>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">Todas</button>
+      <button class="filter-btn" data-filter="pending">Pendentes</button>
+      <button class="filter-btn" data-filter="completed">Concluídas</button>
+    </div>
+
+    <ul id="task-list"></ul>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

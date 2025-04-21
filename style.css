@@ -1,0 +1,155 @@
+:root {
+    --background: #f0f2f5;
+    --container-bg: white;
+    --text-color: black;
+    --task-bg: #e2e8f0;
+}
+
+body.dark {
+    --background: #121212;
+    --container-bg: #1e1e1e;
+    --text-color: #f0f0f0;
+    --task-bg: #2c2c2c;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--background);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: var(--container-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    animation: fadeIn 1s ease;
+    transition: background 0.3s;
+}
+
+h1 {
+    text-align: center;
+}
+
+#theme-toggle {
+    background: none;
+    border: 2px solid var(--text-color);
+    color: var(--text-color);
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin: 10px auto;
+    display: block;
+    transition: background 0.3s, color 0.3s;
+}
+
+#theme-toggle:hover {
+    background: var(--text-color);
+    color: var(--background);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input, button {
+    padding: 10px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: var(--task-bg);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.5s ease;
+    transition: background 0.3s;
+}
+
+.task-completed {
+    text-decoration: line-through;
+    color: gray;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #e53e3e;
+    transition: transform 0.2s;
+}
+
+.delete-btn:hover {
+    transform: scale(1.2);
+}
+
+.filters {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.filter-btn {
+    padding: 8px 12px;
+    border: none;
+    background: #ccc;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.filter-btn:hover {
+    background: #bbb;
+}
+
+.filter-btn.active {
+    background: #4CAF50;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
