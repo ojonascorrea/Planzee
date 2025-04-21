@@ -11,6 +11,7 @@ const tagSelect = document.getElementById('tag-select');
 const editModal = document.getElementById('edit-modal');
 const editModalForm = document.getElementById('edit-modal-form');
 const modalClose = document.querySelector('.modal-close');
+const projectSelect = document.getElementById('project-select');
 let productivityChart;
 let currentEditingTask = null;
 
@@ -19,10 +20,13 @@ let currentFilter = 'all';
 let currentPeriod = 'semana';
 let currentCategory = 'all';
 let currentTag = 'all';
+let currentProject = 'default';
+let projects = [];
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
+    loadProjects();
     loadTasks();
     setupEventListeners();
     setupModalListeners();
@@ -31,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     createChart(generateProductivityData());
     updateCategorySelect();
     updateTagSelect();
+    updateProjectSelect();
+    updateTaskProjectSelect();
     
     // Define o botão da semana como ativo por padrão
     document.querySelector('.period-btn[data-period="semana"]').classList.add('active');
@@ -70,6 +76,17 @@ function setupEventListeners() {
     // Etiquetas
     tagSelect.addEventListener('change', handleTagChange);
     
+    // Projetos
+    if (projectSelect) {
+        projectSelect.addEventListener('change', handleProjectChange);
+        
+        // Botão para adicionar novo projeto
+        const addProjectBtn = document.getElementById('add-project-btn');
+        if (addProjectBtn) {
+            addProjectBtn.addEventListener('click', handleAddProject);
+        }
+    }
+    
     // Arrastar e soltar
     taskList.addEventListener('dragover', handleDragOver);
     
@@ -100,6 +117,7 @@ function setupTaskEventListeners(li) {
         const currentTime = li.dataset.date.split('T')[1];
         const currentPriority = li.querySelector('.badge').classList[1].split('-')[1];
         const currentCategory = li.getAttribute('data-category');
+        const currentProject = li.getAttribute('data-project');
 
         // Preenche o modal com os dados atuais
         document.getElementById('edit-title-modal').value = currentTitle;
@@ -107,6 +125,22 @@ function setupTaskEventListeners(li) {
         document.getElementById('edit-time-modal').value = currentTime;
         document.getElementById('edit-priority-modal').value = currentPriority;
         document.getElementById('edit-category-modal').value = currentCategory === 'outros' ? '' : currentCategory;
+        
+        // Preenche o select de projetos no modal, se existir
+        const editProjectModal = document.getElementById('edit-project-modal');
+        if (editProjectModal) {
+            // Preenche as opções de projeto
+            editProjectModal.innerHTML = '';
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project;
+                option.textContent = project.charAt(0).toUpperCase() + project.slice(1);
+                editProjectModal.appendChild(option);
+            });
+            
+            // Seleciona o projeto atual
+            editProjectModal.value = currentProject || 'default';
+        }
 
         // Adiciona classe para animar a tarefa
         li.classList.add('editing');
@@ -179,17 +213,22 @@ function setupModalListeners() {
         const newTime = document.getElementById('edit-time-modal').value;
         const newPriority = document.getElementById('edit-priority-modal').value;
         const newCategory = document.getElementById('edit-category-modal').value.trim();
+        
+        // Obtém o novo projeto, se o campo existir
+        const editProjectModal = document.getElementById('edit-project-modal');
+        const newProject = editProjectModal ? editProjectModal.value : currentEditingTask.getAttribute('data-project');
 
         // Atualiza os dados da tarefa
         currentEditingTask.dataset.date = `${newDate}T${newTime}`;
         currentEditingTask.setAttribute('data-category', newCategory || 'outros');
+        currentEditingTask.setAttribute('data-project', newProject || 'default');
 
         // Atualiza o HTML da tarefa
         const newTaskInfo = document.createElement('div');
         newTaskInfo.className = 'task-info';
         newTaskInfo.innerHTML = createTaskHTML(newTitle, newDate, newTime, 
             currentEditingTask.querySelector('.complete-checkbox').checked, 
-            newPriority, newCategory);
+            newPriority, newCategory, extractEtiquetas(newTitle), newProject);
 
         currentEditingTask.querySelector('.task-info').replaceWith(newTaskInfo);
 
@@ -243,9 +282,15 @@ function handleTaskSubmit(e) {
     const priority = document.getElementById('task-priority').value;
     const category = document.getElementById('task-category').value.trim();
     
+    // Obtém o projeto selecionado
+    const projectSelect = document.getElementById('task-project');
+    const project = projectSelect ? projectSelect.value : 'default';
+    
+    console.log('Criando tarefa com projeto:', project); // Debug
+    
     if (!title || !date || !time) return;
     
-    addTask(title, date, time, false, priority, category);
+    addTask(title, date, time, false, priority, category, project);
     
     taskForm.reset();
     fillDateTimeInputs();
@@ -253,6 +298,11 @@ function handleTaskSubmit(e) {
     createChart(generateProductivityData());
     updateCategorySelect();
     updateTagSelect();
+    
+    // Restaura a seleção do projeto após limpar o formulário
+    if (projectSelect) {
+        projectSelect.value = project; // Mantém o mesmo projeto para a próxima tarefa
+    }
 }
 
 function extractEtiquetas(title) {
@@ -261,7 +311,9 @@ function extractEtiquetas(title) {
     return matches ? matches.map(match => match.substring(1)) : [];
 }
 
-function addTask(title, date, time, completed, priority, category = '') {
+function addTask(title, date, time, completed, priority, category = '', project = 'default') {
+    console.log('Função addTask recebeu projeto:', project); // Debug
+    
     // Processa as etiquetas
     const etiquetas = extractEtiquetas(title);
     let cleanTitle = title;
@@ -279,6 +331,9 @@ function addTask(title, date, time, completed, priority, category = '') {
     li.setAttribute('draggable', true);
     li.setAttribute('data-category', category || 'outros');
     li.setAttribute('data-date', `${date}T${time}`);
+    li.setAttribute('data-project', project);
+    
+    console.log('Elemento li criado com data-project:', li.getAttribute('data-project')); // Debug
     
     // Verifica se a tarefa está atrasada
     const taskDateTime = new Date(`${date}T${time}`);
@@ -289,7 +344,7 @@ function addTask(title, date, time, completed, priority, category = '') {
     }
     
     // Usa cleanTitle ao invés de title
-    li.innerHTML = createTaskHTML(cleanTitle, date, time, completed, priority, category, etiquetas);
+    li.innerHTML = createTaskHTML(cleanTitle, date, time, completed, priority, category, etiquetas, project);
     
     setupTaskEventListeners(li);
     
@@ -306,7 +361,9 @@ function addTask(title, date, time, completed, priority, category = '') {
 }
 
 // Função auxiliar para criar o HTML da tarefa
-function createTaskHTML(title, date, time, completed, priority, category, etiquetas = []) {
+function createTaskHTML(title, date, time, completed, priority, category, etiquetas = [], project = 'default') {
+    console.log('createTaskHTML recebeu projeto:', project); // Debug
+    
     // Extrai e remove as etiquetas do título
     let cleanTitle = title;
     etiquetas.forEach(tag => {
@@ -318,12 +375,18 @@ function createTaskHTML(title, date, time, completed, priority, category, etique
         `<a href="tags.html?tag=${encodeURIComponent(tag)}" class="tag-badge" data-tag="${tag}">@${tag}</a>`
     ).join('');
 
+    // Adiciona badge do projeto, se não for o padrão
+    const projectBadge = project && project !== 'default' 
+        ? `<span class="project-badge" data-project="${project}">${project}</span>` 
+        : '';
+
     return `
         <div class="task-info">
             <div class="task-header">
                 <div class="task-badges">
                     <span class="badge badge-${priority}">${priority.toUpperCase()}</span>
                     ${category ? `<span class="category-badge">${category}</span>` : ''}
+                    ${projectBadge}
                     ${etiquetasBadges}
                 </div>
                 <div class="task-actions">
@@ -418,6 +481,7 @@ function applyFiltersToList(container, searchText, isCompletedList) {
         const isCompleted = task.querySelector('.complete-checkbox').checked || isCompletedList;
         const taskDate = new Date(task.dataset.date);
         const taskCategory = task.getAttribute('data-category');
+        const taskProject = task.getAttribute('data-project');
         const taskTags = Array.from(task.querySelectorAll('.tag-badge')).map(tag => 
             tag.getAttribute('data-tag')
         );
@@ -445,6 +509,11 @@ function applyFiltersToList(container, searchText, isCompletedList) {
         
         // Aplica filtro de categoria
         if (shouldShow && currentCategory !== 'all' && taskCategory !== currentCategory) {
+            shouldShow = false;
+        }
+        
+        // Aplica filtro de projeto
+        if (shouldShow && currentProject !== 'all' && taskProject !== currentProject) {
             shouldShow = false;
         }
         
@@ -489,6 +558,9 @@ function saveTasks() {
         const title = li.querySelector('.task-title').textContent;
         const tags = Array.from(li.querySelectorAll('.tag-badge')).map(tag => tag.textContent);
         const fullTitle = title + ' ' + tags.join(' ');
+        const project = li.getAttribute('data-project') || 'default';
+        
+        console.log('Salvando tarefa com projeto:', project); // Debug
         
         return {
             title: fullTitle.trim(),
@@ -496,7 +568,8 @@ function saveTasks() {
             time: li.dataset.date.split('T')[1],
             completed: li.querySelector('.complete-checkbox').checked,
             priority: li.querySelector('.badge').classList[1].split('-')[1],
-            category: li.getAttribute('data-category')
+            category: li.getAttribute('data-category'),
+            project: project
         };
     });
     
@@ -507,6 +580,9 @@ function saveTasks() {
             const title = li.querySelector('.task-title').textContent;
             const tags = Array.from(li.querySelectorAll('.tag-badge')).map(tag => tag.textContent);
             const fullTitle = title + ' ' + tags.join(' ');
+            const project = li.getAttribute('data-project') || 'default';
+            
+            console.log('Salvando tarefa concluída com projeto:', project); // Debug
             
             return {
                 title: fullTitle.trim(),
@@ -514,7 +590,8 @@ function saveTasks() {
                 time: li.dataset.date.split('T')[1],
                 completed: true, // Sempre concluídas nesta lista
                 priority: li.querySelector('.badge').classList[1].split('-')[1],
-                category: li.getAttribute('data-category')
+                category: li.getAttribute('data-category'),
+                project: project
             };
         });
         
@@ -522,19 +599,24 @@ function saveTasks() {
         allTasks.push(...completedTasks);
     }
     
+    console.log('Todas as tarefas a serem salvas:', allTasks); // Debug
     localStorage.setItem('tasks', JSON.stringify(allTasks));
 }
 
 function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    console.log('Tarefas carregadas do localStorage:', tasks); // Debug
+    
     tasks.forEach(task => {
+        console.log('Carregando tarefa com projeto:', task.project); // Debug
         addTask(
             task.title,
             task.date,
             task.time,
             task.completed,
             task.priority,
-            task.category
+            task.category,
+            task.project || 'default' // Garante que sempre temos um projeto
         );
     });
 }
@@ -656,7 +738,8 @@ function sortTasksByDate() {
     tasks.sort((a, b) => {
         const dateA = new Date(a.dataset.date);
         const dateB = new Date(b.dataset.date);
-        return dateA - dateB;
+        // Invertendo a ordem: a mais recente (maior data) vem primeiro
+        return dateB - dateA;
     });
     
     tasks.forEach(task => taskList.appendChild(task));
@@ -698,6 +781,90 @@ function updateTagSelect() {
     });
 }
 
+// Projetos
+function loadProjects() {
+    projects = JSON.parse(localStorage.getItem('projects') || '["default"]');
+    currentProject = localStorage.getItem('currentProject') || 'default';
+    console.log('Projetos carregados:', projects); // Debug
+    console.log('Projeto atual:', currentProject); // Debug
+    
+    // Atualiza o select de projetos no formulário de criação
+    setTimeout(() => updateTaskProjectSelect(), 100);
+}
+
+function saveProjects() {
+    localStorage.setItem('projects', JSON.stringify(projects));
+    localStorage.setItem('currentProject', currentProject);
+}
+
+function handleProjectChange() {
+    currentProject = this.value;
+    localStorage.setItem('currentProject', currentProject);
+    
+    // Atualiza o select no formulário de criação com o projeto atual
+    const taskProject = document.getElementById('task-project');
+    if (taskProject && currentProject !== 'all') {
+        taskProject.value = currentProject;
+    } else if (taskProject) {
+        taskProject.value = 'default';
+    }
+    
+    applyFilters();
+}
+
+function handleAddProject() {
+    // Usa o prompt para obter o nome do novo projeto
+    const projectName = prompt("Digite o nome do novo projeto:");
+    
+    if (projectName && projectName.trim() !== '') {
+        // Adiciona o projeto apenas se não existir
+        if (!projects.includes(projectName)) {
+            projects.push(projectName);
+            saveProjects();
+            
+            // Atualiza os selects de projeto
+            updateProjectSelect();
+            updateTaskProjectSelect();
+            
+            // Seleciona o novo projeto
+            projectSelect.value = projectName;
+            currentProject = projectName;
+            
+            // Atualiza o select no formulário de criação com o novo projeto
+            const taskProject = document.getElementById('task-project');
+            if (taskProject) {
+                taskProject.value = projectName;
+            }
+            
+            // Aplica os filtros para mostrar apenas tarefas do novo projeto
+            applyFilters();
+        } else {
+            alert("Este projeto já existe!");
+        }
+    }
+}
+
+function updateProjectSelect() {
+    if (!projectSelect) return;
+    
+    projectSelect.innerHTML = '<option value="all">Todos os projetos</option>';
+    
+    projects.forEach(project => {
+        const option = document.createElement('option');
+        option.value = project;
+        option.textContent = project.charAt(0).toUpperCase() + project.slice(1);
+        projectSelect.appendChild(option);
+    });
+    
+    // Seleciona o projeto atual
+    if (projects.includes(currentProject)) {
+        projectSelect.value = currentProject;
+    } else {
+        projectSelect.value = 'all';
+        currentProject = 'all';
+    }
+}
+
 // Notificações
 setInterval(checkTasksForNotifications, 60000);
 
@@ -720,6 +887,46 @@ function checkTasksForNotifications() {
             }
         }
     });
+}
+
+// Função para preencher o select de projetos no formulário de criação de tarefas
+function updateTaskProjectSelect() {
+    console.log('Atualizando select de projetos no formulário de criação'); // Debug
+    console.log('Projetos disponíveis:', projects); // Debug
+    
+    const taskProject = document.getElementById('task-project');
+    if (!taskProject) {
+        console.log('Elemento task-project não encontrado'); // Debug
+        return;
+    }
+    
+    // Limpa as opções existentes
+    taskProject.innerHTML = '';
+    
+    // Adiciona a opção padrão
+    const defaultOption = document.createElement('option');
+    defaultOption.value = 'default';
+    defaultOption.textContent = 'Projeto Padrão';
+    taskProject.appendChild(defaultOption);
+    
+    // Adiciona as opções de projetos existentes
+    projects.forEach(project => {
+        if (project === 'default') return; // Pula o projeto padrão, já adicionado acima
+        
+        const option = document.createElement('option');
+        option.value = project;
+        option.textContent = project.charAt(0).toUpperCase() + project.slice(1);
+        taskProject.appendChild(option);
+    });
+    
+    // Seleciona o projeto atual
+    if (projects.includes(currentProject) && currentProject !== 'all') {
+        taskProject.value = currentProject;
+        console.log('Selecionado projeto atual:', currentProject); // Debug
+    } else {
+        taskProject.value = 'default';
+        console.log('Selecionado projeto padrão'); // Debug
+    }
 }
 
 

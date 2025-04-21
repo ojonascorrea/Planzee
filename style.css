@@ -1103,3 +1103,99 @@ body.dark .category-select {
     padding: 10px;
     border-radius: 8px;
 }
+
+/* Estilos para projetos */
+#project-filters {
+    margin: 15px 0;
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.project-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.add-project-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-project-btn:hover {
+    background-color: var(--primary-color-dark);
+}
+
+.completed-title {
+    cursor: pointer;
+    margin-top: 30px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-color);
+    transition: color 0.2s;
+}
+
+.completed-title:hover {
+    color: var(--primary-color);
+}
+
+.completed-tasks-container {
+    margin-top: 20px;
+}
+
+.project-container {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #ffffff;
+    color: #000000;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+    padding-right: 2.5em;
+    cursor: pointer;
+}
+
+.project-select:focus {
+    outline: none;
+    border-color: #45a049;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+body.dark .project-select {
+    background: #ffffff;
+    color: #000000;
+}
+
+.project-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    background: #673ab7;
+    color: white;
+    margin-right: 5px;
+    display: inline-block;
+}

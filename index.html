@@ -36,6 +36,15 @@
               <option value="all">Todas as etiquetas</option>
             </select>
           </div>
+          <div id="project-filters">
+            <div class="project-header">
+              <h3>Projetos</h3>
+              <button id="add-project-btn" class="add-project-btn">+ Novo Projeto</button>
+            </div>
+            <select id="project-select" class="category-select">
+              <option value="all">Todos os projetos</option>
+            </select>
+          </div>
           <div id="period-filters">
             <button class="period-btn" data-period="dia">Hoje 📅</button>
             <button class="period-btn" data-period="semana">Semana 📆</button>
@@ -62,6 +71,12 @@
         <div class="category-container">
           <input type="text" id="task-category" placeholder="Digite a categoria (opcional)" class="category-input">
         </div>
+        
+        <div class="project-container">
+          <select id="task-project" class="project-select">
+            <!-- Opções de projeto serão preenchidas via JavaScript -->
+          </select>
+        </div>
 
         <button type="submit">Adicionar</button>
       </form>
@@ -77,8 +92,9 @@
       </div>
 
       <ul id="task-list"></ul>
-      <div id="completed-section">
-        <h3 id="completed-title">Tarefas Concluídas (clique para expandir)</h3>
+      
+      <div class="completed-tasks-container">
+        <h3 id="completed-title" class="completed-title">Tarefas Concluídas ⤵</h3>
         <ul id="completed-tasks" style="display: none;"></ul>
       </div>
     </div>
@@ -108,6 +124,12 @@
         <div class="form-group">
           <label for="edit-category-modal">Categoria</label>
           <input type="text" id="edit-category-modal" placeholder="Digite a categoria (opcional)">
+        </div>
+        <div class="form-group">
+          <label for="edit-project-modal">Projeto</label>
+          <select id="edit-project-modal" required>
+            <!-- Opções de projetos serão preenchidas pelo JavaScript -->
+          </select>
         </div>
         <div class="modal-actions">
           <button type="submit" class="save-btn">Salvar Alterações</button>
