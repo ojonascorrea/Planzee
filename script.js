@@ -26,8 +26,8 @@ function addTask(title, date, time, completed) {
     const li = document.createElement('li');
 
     li.innerHTML = `
-        <span>
-            <strong>${title}</strong> - 
+        <span class="task-info">
+            <strong class="task-title">${title}</strong> - 
             <small>${formatDate(date)} às ${time}</small>
         </span>
         <div class="actions">
@@ -36,8 +36,31 @@ function addTask(title, date, time, completed) {
         </div>
     `;
 
+    const titleElement = li.querySelector('.task-title');
     const checkbox = li.querySelector('.complete-checkbox');
     const deleteBtn = li.querySelector('.delete-btn');
+
+    // 🖊️ Clicar para editar o título
+    titleElement.addEventListener('click', function () {
+        const currentTitle = this.textContent;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentTitle;
+        input.className = 'edit-input';
+
+        this.replaceWith(input);
+        input.focus();
+
+        input.addEventListener('blur', function () {
+            finishEditing(input, li);
+        });
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                finishEditing(input, li);
+            }
+        });
+    });
 
     checkbox.addEventListener('change', function() {
         li.classList.toggle('task-completed', this.checked);
@@ -54,6 +77,39 @@ function addTask(title, date, time, completed) {
     }
 
     taskList.appendChild(li);
+}
+
+// 🛠️ Função para finalizar edição
+function finishEditing(input, li) {
+    const newTitle = input.value.trim() || "Sem título";
+
+    const newTitleElement = document.createElement('strong');
+    newTitleElement.className = 'task-title';
+    newTitleElement.textContent = newTitle;
+
+    newTitleElement.addEventListener('click', function () {
+        const currentTitle = this.textContent;
+        const inputAgain = document.createElement('input');
+        inputAgain.type = 'text';
+        inputAgain.value = currentTitle;
+        inputAgain.className = 'edit-input';
+
+        this.replaceWith(inputAgain);
+        inputAgain.focus();
+
+        inputAgain.addEventListener('blur', function () {
+            finishEditing(inputAgain, li);
+        });
+
+        inputAgain.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                finishEditing(inputAgain, li);
+            }
+        });
+    });
+
+    input.replaceWith(newTitleElement);
+    saveTasks();
 }
 
 function saveTasks() {

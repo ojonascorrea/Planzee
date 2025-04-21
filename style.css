@@ -94,6 +94,18 @@ li {
     transition: background 0.3s;
 }
 
+.task-title {
+    font-size: 16px;
+    padding: 5px;
+    width: 80%;
+}
+
+.edit-input {
+    font-size: 16px;
+    padding: 5px;
+    width: 80%;
+}
+
 .task-completed {
     text-decoration: line-through;
     color: gray;
