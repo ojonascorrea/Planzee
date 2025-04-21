@@ -74,6 +74,39 @@
     </div>
   </div>
 
+  <!-- Modal de Edição -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Editar Tarefa</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="edit-modal-form" class="modal-form">
+        <div class="form-group">
+          <label for="edit-title-modal">Título da Tarefa</label>
+          <input type="text" id="edit-title-modal" required>
+        </div>
+        <div class="form-group datetime-priority-group">
+          <input type="date" id="edit-date-modal" required>
+          <input type="time" id="edit-time-modal" required>
+          <select id="edit-priority-modal" required>
+            <option value="alta">Alta Prioridade 🔥</option>
+            <option value="media">Média Prioridade 📝</option>
+            <option value="baixa">Baixa Prioridade 💤</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-category-modal">Categoria</label>
+          <input type="text" id="edit-category-modal" placeholder="Digite a categoria (opcional)">
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="save-btn">Salvar Alterações</button>
+          <button type="button" class="cancel-btn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>

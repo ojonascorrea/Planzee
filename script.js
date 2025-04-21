@@ -7,7 +7,11 @@ const searchInput = document.getElementById('search-input');
 const sortByDateBtn = document.getElementById('sort-by-date-btn');
 const periodButtons = document.querySelectorAll('.period-btn');
 const categorySelect = document.getElementById('category-select');
+const editModal = document.getElementById('edit-modal');
+const editModalForm = document.getElementById('edit-modal-form');
+const modalClose = document.querySelector('.modal-close');
 let productivityChart;
+let currentEditingTask = null;
 
 // Estado da aplicação
 let currentFilter = 'all';
@@ -19,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
     loadTasks();
     setupEventListeners();
+    setupModalListeners();
     fillDateTimeInputs();
     updateProgress();
     createChart(generateProductivityData());
@@ -61,6 +66,139 @@ function setupEventListeners() {
     
     // Arrastar e soltar
     taskList.addEventListener('dragover', handleDragOver);
+}
+
+function setupTaskEventListeners(li) {
+    // Drag and Drop
+    li.addEventListener('dragstart', () => li.classList.add('dragging'));
+    li.addEventListener('dragend', () => {
+        li.classList.remove('dragging');
+        saveTasks();
+    });
+    
+    // Botão de edição
+    const editBtn = li.querySelector('.edit-btn');
+    editBtn.addEventListener('click', () => {
+        currentEditingTask = li;
+        const currentTitle = li.querySelector('.task-title').textContent;
+        const currentDate = li.dataset.date.split('T')[0];
+        const currentTime = li.dataset.date.split('T')[1];
+        const currentPriority = li.querySelector('.badge').classList[1].split('-')[1];
+        const currentCategory = li.getAttribute('data-category');
+
+        // Preenche o modal com os dados atuais
+        document.getElementById('edit-title-modal').value = currentTitle;
+        document.getElementById('edit-date-modal').value = currentDate;
+        document.getElementById('edit-time-modal').value = currentTime;
+        document.getElementById('edit-priority-modal').value = currentPriority;
+        document.getElementById('edit-category-modal').value = currentCategory === 'outros' ? '' : currentCategory;
+
+        // Adiciona classe para animar a tarefa
+        li.classList.add('editing');
+
+        // Mostra o modal com animação
+        editModal.style.display = 'flex';
+        setTimeout(() => {
+            editModal.classList.add('show');
+        }, 10);
+    });
+    
+    // Checkbox
+    const checkbox = li.querySelector('.complete-checkbox');
+    checkbox.addEventListener('change', () => {
+        li.classList.toggle('task-completed', checkbox.checked);
+        saveTasks();
+        updateProgress();
+        createChart(generateProductivityData());
+        applyFilters();
+    });
+    
+    // Botão de deletar
+    const deleteBtn = li.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', () => {
+        li.classList.add('fade-out');
+        li.addEventListener('animationend', () => {
+            li.remove();
+            saveTasks();
+            updateProgress();
+            createChart(generateProductivityData());
+            updateCategorySelect();
+            applyFilters();
+        }, { once: true });
+    });
+}
+
+// Configuração dos event listeners do modal
+function setupModalListeners() {
+    modalClose.addEventListener('click', closeModal);
+    
+    editModal.addEventListener('click', (e) => {
+        if (e.target === editModal) {
+            closeModal();
+        }
+    });
+
+    editModalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!currentEditingTask) return;
+
+        const newTitle = document.getElementById('edit-title-modal').value;
+        const newDate = document.getElementById('edit-date-modal').value;
+        const newTime = document.getElementById('edit-time-modal').value;
+        const newPriority = document.getElementById('edit-priority-modal').value;
+        const newCategory = document.getElementById('edit-category-modal').value.trim();
+
+        // Atualiza os dados da tarefa
+        currentEditingTask.dataset.date = `${newDate}T${newTime}`;
+        currentEditingTask.setAttribute('data-category', newCategory || 'outros');
+
+        // Atualiza o HTML da tarefa
+        const newTaskInfo = document.createElement('div');
+        newTaskInfo.className = 'task-info';
+        newTaskInfo.innerHTML = createTaskHTML(newTitle, newDate, newTime, 
+            currentEditingTask.querySelector('.complete-checkbox').checked, 
+            newPriority, newCategory);
+
+        currentEditingTask.querySelector('.task-info').replaceWith(newTaskInfo);
+
+        // Verifica se a tarefa está atrasada
+        const taskDateTime = new Date(`${newDate}T${newTime}`);
+        const now = new Date();
+        if (taskDateTime < now && !currentEditingTask.querySelector('.complete-checkbox').checked) {
+            currentEditingTask.classList.add('overdue');
+        } else {
+            currentEditingTask.classList.remove('overdue');
+        }
+
+        // Remove a classe de edição e adiciona animação de retorno
+        currentEditingTask.classList.remove('editing');
+        currentEditingTask.style.animation = 'taskSlideIn 0.3s forwards';
+
+        // Reaplica os event listeners
+        setupTaskEventListeners(currentEditingTask);
+
+        // Atualiza tudo
+        saveTasks();
+        updateProgress();
+        createChart(generateProductivityData());
+        updateCategorySelect();
+        applyFilters();
+
+        // Fecha o modal
+        closeModal();
+    });
+}
+
+function closeModal() {
+    editModal.classList.remove('show');
+    setTimeout(() => {
+        editModal.style.display = 'none';
+        if (currentEditingTask) {
+            currentEditingTask.classList.remove('editing');
+            currentEditingTask.style.animation = 'taskSlideIn 0.3s forwards';
+            currentEditingTask = null;
+        }
+    }, 300);
 }
 
 // Manipulação de Tarefas
@@ -130,157 +268,6 @@ function createTaskHTML(title, date, time, completed, priority, category) {
             </div>
         </div>
     `;
-}
-
-function setupTaskEventListeners(li) {
-    // Drag and Drop
-    li.addEventListener('dragstart', () => li.classList.add('dragging'));
-    li.addEventListener('dragend', () => {
-        li.classList.remove('dragging');
-        saveTasks();
-    });
-    
-    // Edição de título
-    const titleElement = li.querySelector('.task-title');
-    titleElement.addEventListener('click', () => startEditingTitle(titleElement, li));
-    
-    // Botão de edição
-    const editBtn = li.querySelector('.edit-btn');
-    editBtn.addEventListener('click', () => {
-        const taskInfo = li.querySelector('.task-info');
-        const currentTitle = titleElement.textContent;
-        const currentDate = li.dataset.date.split('T')[0];
-        const currentTime = li.dataset.date.split('T')[1];
-        const currentPriority = li.querySelector('.badge').classList[1].split('-')[1];
-        const currentCategory = li.getAttribute('data-category');
-        
-        // Salva o HTML original da taskInfo
-        const originalTaskInfoHTML = taskInfo.outerHTML;
-        
-        // Cria formulário de edição
-        const editForm = document.createElement('form');
-        editForm.className = 'edit-form';
-        editForm.innerHTML = `
-            <input type="text" class="edit-title" value="${currentTitle}" required>
-            <input type="date" class="edit-date" value="${currentDate}" required>
-            <input type="time" class="edit-time" value="${currentTime}" required>
-            <select class="edit-priority">
-                <option value="alta" ${currentPriority === 'alta' ? 'selected' : ''}>Alta Prioridade</option>
-                <option value="media" ${currentPriority === 'media' ? 'selected' : ''}>Média Prioridade</option>
-                <option value="baixa" ${currentPriority === 'baixa' ? 'selected' : ''}>Baixa Prioridade</option>
-            </select>
-            <input type="text" class="edit-category" value="${currentCategory === 'outros' ? '' : currentCategory}" placeholder="Categoria (opcional)">
-            <div class="edit-actions">
-                <button type="submit" class="save-btn">Salvar</button>
-                <button type="button" class="cancel-btn">Cancelar</button>
-            </div>
-        `;
-        
-        // Substitui o conteúdo da tarefa pelo formulário
-        taskInfo.replaceWith(editForm);
-        
-        // Evento de submit do formulário
-        editForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newTitle = editForm.querySelector('.edit-title').value;
-            const newDate = editForm.querySelector('.edit-date').value;
-            const newTime = editForm.querySelector('.edit-time').value;
-            const newPriority = editForm.querySelector('.edit-priority').value;
-            const newCategory = editForm.querySelector('.edit-category').value.trim();
-            
-            // Atualiza os dados da tarefa
-            li.dataset.date = `${newDate}T${newTime}`;
-            li.setAttribute('data-category', newCategory || 'outros');
-            
-            // Cria o novo HTML da tarefa
-            const newTaskInfo = document.createElement('div');
-            newTaskInfo.className = 'task-info';
-            newTaskInfo.innerHTML = createTaskHTML(newTitle, newDate, newTime, li.querySelector('.complete-checkbox')?.checked || false, newPriority, newCategory);
-            
-            // Substitui o formulário pelo novo conteúdo
-            editForm.replaceWith(newTaskInfo);
-            
-            // Verifica se a tarefa está atrasada
-            const taskDateTime = new Date(`${newDate}T${newTime}`);
-            const now = new Date();
-            if (taskDateTime < now && !li.querySelector('.complete-checkbox').checked) {
-                li.classList.add('overdue');
-            } else {
-                li.classList.remove('overdue');
-            }
-            
-            // Reaplica os event listeners
-            setupTaskEventListeners(li);
-            
-            saveTasks();
-            updateProgress();
-            createChart(generateProductivityData());
-            updateCategorySelect();
-            applyFilters();
-        });
-        
-        // Evento de cancelar
-        editForm.querySelector('.cancel-btn').addEventListener('click', () => {
-            // Restaura o conteúdo original
-            const originalTaskInfo = document.createElement('div');
-            originalTaskInfo.className = 'task-info';
-            originalTaskInfo.innerHTML = originalTaskInfoHTML;
-            editForm.replaceWith(originalTaskInfo);
-            setupTaskEventListeners(li);
-        });
-    });
-    
-    // Checkbox
-    const checkbox = li.querySelector('.complete-checkbox');
-    checkbox.addEventListener('change', () => {
-        li.classList.toggle('task-completed', checkbox.checked);
-        saveTasks();
-        updateProgress();
-        createChart(generateProductivityData());
-        applyFilters();
-    });
-    
-    // Botão de deletar
-    const deleteBtn = li.querySelector('.delete-btn');
-    deleteBtn.addEventListener('click', () => {
-        li.classList.add('fade-out');
-        li.addEventListener('animationend', () => {
-            li.remove();
-            saveTasks();
-            updateProgress();
-            createChart(generateProductivityData());
-            updateCategorySelect();
-            applyFilters();
-        }, { once: true });
-    });
-}
-
-function startEditingTitle(titleElement, li) {
-    const currentTitle = titleElement.textContent;
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = currentTitle;
-    input.className = 'edit-input';
-
-    titleElement.replaceWith(input);
-    input.focus();
-
-    input.addEventListener('blur', () => finishEditing(input, li));
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            finishEditing(input, li);
-        }
-    });
-}
-
-function finishEditing(input, li) {
-    const newTitle = input.value.trim() || "Sem título";
-    const newTitleElement = document.createElement('strong');
-    newTitleElement.className = 'task-title';
-    newTitleElement.textContent = newTitle;
-    newTitleElement.addEventListener('click', () => startEditingTitle(newTitleElement, li));
-    input.replaceWith(newTitleElement);
-    saveTasks();
 }
 
 function handleDragOver(e) {
